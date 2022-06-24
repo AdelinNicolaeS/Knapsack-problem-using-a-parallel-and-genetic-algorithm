@@ -1,0 +1,37 @@
+	Pentru rezolvarea temei am inceput prin a modifica scheletul deja
+primit si a incerca sa paralelizez. Mai intai am modificat functia read_input
+pentru a permite citirea argumentului ce precizeaza numarul de threads pe care
+se va lucra, dupa care am construit pe modelul din laboratoare o functie
+principala unde am declarat thread-urile pe care le voi folosi, precum si cele
+2 generatii etalon (current si next), dupa care am creat functia thread_function
+in care se afla practic implementarea optima. Am creat o structura pentru a-mi
+permite sa aduc in thread_function toate datele necesare prelucrarii paralelizate
+dupa care la final am dat join thread-urilor.
+	Majoritatea functiilor auxiliare din schelet nu au fost modificate, cu
+exceptia functiei cmpfunc pe care am optimizat-o prin crearea unui nou camp in
+structura individului, anume numarul de objects care sunt folosite, tocmai pentru
+ca ar fi fost redundanta recalcularea acestei valori la fiecare comparatie. Am
+creat de asemenea o functie do_distribution care pentru un range specific si un
+index divide in mod egal intervalul si stabileste portiunea pe care va lucra
+thread-ul respectiv, functie pe care am folosit-o deseori in thread_function.
+	In thread_function, dupa realizarea initializarii, pornesc un for loop
+pentru calcularea fiecarei generatii in parte si respect pasii din schelet. Mai
+intai recalculez fitness-ul fiecarui individ (totul paralelizat, folosind start
+si end), dupa care inserez o bariera deoarece am nevoie de toate valorile fitness
+calculate inainte de a sorta, dupa care aleg sa sortez toata generatia o data doar
+la indexul 0 (pentru a nu repeta de mai multe ori acelasi pas), inserand o bariera
+pentru a finaliza sortarea. Realizez apoi distributie pentru primii 30% membri din
+generatie pe care doar ii copiez in next_generation si calculez offsetul in cursor.
+La prima mutatie fac distributia pentru primii 20% din generatia actuala pe care
+mai intai ii copiez, dupa care le aplic mutatia pe pozitiile corespunzatoare din
+noua generatie, iar apoi recalculez offsetul. Asemanator calculez si pentru a doua
+mutatie, diferenta fiind ca aici se realizeaza mutatie pe indivizii ce constituie
+20-40% din generatie, de aici si calcul diferit pentru offset. Pentru crossover,
+dupa ce realizez distributia, ma asigur ca thread-urile nu vor interfera intre ele,
+facand mereu startul sa fie par, la fel si endul si asigurandu-ma ca ultimul element
+va fi trecut corespunzator la noua generatie nealterat. La final, realizez tranzitia
+la noua generatie (asigurata prin bariera), reinitializez current_gen si printez
+pentru generatiile multiple de 5 (dar doar la index == 0) best_fitness.
+	La iesirea din loop, recalculez fitness-ul si gasesc best__fitness, insa
+fara a sorta din noua toata generatie, ci mai eficient doar printr-o simpla
+parcurgere liniara.
